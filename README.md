@@ -1,5 +1,7 @@
 # Base‑N Trie
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 > A collection of trie (prefix‑tree) implementations for arbitrary bases:
 > - **Decimal trie** (base‑10)  
 > - **Hex trie** (base‑16)  

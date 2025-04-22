@@ -1,39 +1,21 @@
+#include "decimal_trie.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 
-#define DIGIT_COUNT 10
-#define MAX_KEY_LEN 64    // adjust if you expect longer keys
+/* static helper‑prototypes, e.g.: */
 
-typedef struct DecTrieNode_s {
-    struct DecTrieNode_s *children[DIGIT_COUNT];
-    int is_terminal;
-} DecTrieNode;
-
-typedef struct DecTrie_s {
-    DecTrieNode *root;
-} DecTrie;
-
-/* Function prototypes */
-DecTrie *      create_dectrie(void);
-DecTrieNode *  create_node(void);
-void           destroy_dectrie(DecTrie *trie);
-void           destroy_node(DecTrieNode *node);
-int            get_digit_index(char digit);
-char           index_to_char(int idx);
-void           insert(DecTrie *trie, const char *key);
-int            search(DecTrie *trie, const char *key);
-void           remove_string(DecTrie *trie, const char *key);
-int            remove_string_recursive(DecTrieNode *node,
-                                       const char *key,
-                                       int length,
-                                       int position);
-int            has_children(DecTrieNode *node);
+static DecTrieNode *create_node(void);
+static void destroy_node(DecTrieNode *node);
+static int get_digit_index(char digit);
+static char index_to_char(int idx);
+static int remove_string_recursive(DecTrieNode *node, const char *key,
+                                   size_t len, size_t pos);
+static int has_children(DecTrieNode *node);
 
 /* Helpers to print everything in the trie */
-void           _print_all(DecTrieNode *node, char *buf, int depth);
-void           print_trie(DecTrie *trie);
+static void _print_all(DecTrieNode *node, char *buf, int depth);
 
 int main(void) {
     DecTrie *trie = create_dectrie();
@@ -69,6 +51,7 @@ int main(void) {
     return 0;
 }
 
+/* public definitions (signatures come from the header) */
 DecTrie *create_dectrie(void) {
     DecTrie *t = malloc(sizeof *t);
     t->root = create_node();
@@ -78,7 +61,8 @@ DecTrie *create_dectrie(void) {
 DecTrieNode *create_node(void) {
     DecTrieNode *n = malloc(sizeof *n);
     n->is_terminal = 0;
-    for (int i = 0; i < DIGIT_COUNT; i++) n->children[i] = NULL;
+    for (int i = 0; i < DIGIT_COUNT; i++)
+        n->children[i] = NULL;
     return n;
 }
 
@@ -88,7 +72,8 @@ void destroy_dectrie(DecTrie *trie) {
 }
 
 void destroy_node(DecTrieNode *node) {
-    if (!node) return;
+    if (!node)
+        return;
     for (int i = 0; i < DIGIT_COUNT; i++)
         destroy_node(node->children[i]);
     free(node);
@@ -108,8 +93,8 @@ char index_to_char(int idx) {
 
 void insert(DecTrie *trie, const char *key) {
     DecTrieNode *p = trie->root;
-    int len = strlen(key);
-    for (int i = 0; i < len; i++) {
+    size_t len = strlen(key);
+    for (size_t i = 0; i < len; i++) {
         int idx = get_digit_index(key[i]);
         if (!p->children[idx])
             p->children[idx] = create_node();
@@ -120,10 +105,11 @@ void insert(DecTrie *trie, const char *key) {
 
 int search(DecTrie *trie, const char *key) {
     DecTrieNode *p = trie->root;
-    int len = strlen(key);
-    for (int i = 0; i < len; i++) {
+    size_t len = strlen(key);
+    for (size_t i = 0; i < len; i++) {
         int idx = get_digit_index(key[i]);
-        if (!p->children[idx]) return 0;
+        if (!p->children[idx])
+            return 0;
         p = p->children[idx];
     }
     return p->is_terminal;
@@ -133,14 +119,13 @@ void remove_string(DecTrie *trie, const char *key) {
     remove_string_recursive(trie->root, key, strlen(key), 0);
 }
 
-int remove_string_recursive(DecTrieNode *node,
-                            const char *key,
-                            int len,
-                            int pos)
-{
-    if (!node) return 0;
+int remove_string_recursive(DecTrieNode *node, const char *key, size_t len,
+                            size_t pos) {
+    if (!node)
+        return 0;
     if (pos == len) {
-        if (!node->is_terminal) return 0;
+        if (!node->is_terminal)
+            return 0;
         if (has_children(node)) {
             node->is_terminal = 0;
             return 0;
@@ -149,7 +134,8 @@ int remove_string_recursive(DecTrieNode *node,
         return 1;
     }
     int idx = get_digit_index(key[pos]);
-    int child_deleted = remove_string_recursive(node->children[idx], key, len, pos+1);
+    int child_deleted =
+        remove_string_recursive(node->children[idx], key, len, pos + 1);
     if (child_deleted) {
         node->children[idx] = NULL;
         if (pos > 0 && !node->is_terminal && !has_children(node)) {
@@ -161,9 +147,11 @@ int remove_string_recursive(DecTrieNode *node,
 }
 
 int has_children(DecTrieNode *node) {
-    if (!node) return 0;
+    if (!node)
+        return 0;
     for (int i = 0; i < DIGIT_COUNT; i++)
-        if (node->children[i]) return 1;
+        if (node->children[i])
+            return 1;
     return 0;
 }
 
@@ -175,7 +163,7 @@ void _print_all(DecTrieNode *node, char *buf, int depth) {
     for (int d = 0; d < DIGIT_COUNT; d++) {
         if (node->children[d]) {
             buf[depth] = index_to_char(d);
-            _print_all(node->children[d], buf, depth+1);
+            _print_all(node->children[d], buf, depth + 1);
         }
     }
 }
