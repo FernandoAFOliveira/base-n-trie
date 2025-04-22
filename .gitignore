@@ -1,0 +1,14 @@
+# C build artifacts
+*.o
+*.obj
+*.exe
+*.out
+a.out
+
+# VS Code workspace files (if you don’t want everyone’s launch configs)
+.vscode/*
+!.vscode/settings.json
+
+# backup files
+*~
+*.swp

@@ -1,0 +1,8 @@
+# Based on LLVM style, tweaked for 4‑space indents and 80‑col lines
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 80
+AllowShortFunctionsOnASingleLine: Empty
+SortIncludes: false
