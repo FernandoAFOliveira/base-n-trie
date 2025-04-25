@@ -1,4 +1,4 @@
-#include "../include/base_n_trie.h"
+#include "base_n_trie.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
