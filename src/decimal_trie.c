@@ -1,4 +1,4 @@
-#include "decimal_trie.h"
+#include "../include/decimal_trie.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
