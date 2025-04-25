@@ -1,29 +1,29 @@
-#ifndef DECIMAL_TRIE_H
-#define DECIMAL_TRIE_H
+#ifndef BASE_N_TRIE_H
+#define BASE_N_TRIE_H
 
 #include <stddef.h>
 
 #define DIGIT_COUNT 10
 #define MAX_KEY_LEN 20
 
-typedef struct DecTrieNode_s {
-    struct DecTrieNode_s *children[DIGIT_COUNT];
+typedef struct TrieNode_s {
+    struct TrieNode_s *children[DIGIT_COUNT];
     int is_terminal;
-} DecTrieNode;
+} TrieNode;
 
-typedef struct DecTrie_s {
-    DecTrieNode *root;
-} DecTrie;
+typedef struct BaseNTrie_s {
+    TrieNode *root;
+} BaseNTrie;
 
 /* Create/destroy */
-DecTrie *create_dectrie(void);
-void destroy_dectrie(DecTrie *trie);
+BaseNTrie *trie_create(void);
+void trie_destroy(BaseNTrie *trie);
 
 /* Core operations */
-void insert(DecTrie *trie, const char *key);
-int search(DecTrie *trie, const char *key);
-void remove_string(DecTrie *trie, const char *key);
+void trie_insert(BaseNTrie *trie, const char *key);
+int trie_search(BaseNTrie *trie, const char *key);
+void trie_delete(BaseNTrie *trie, const char *key);
 
-void print_trie(DecTrie *trie);
+void print_trie(BaseNTrie *trie);
 
-#endif /* DECIMAL_TRIE_H */
+#endif /* BASE_N_TRIE_H */
