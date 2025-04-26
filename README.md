@@ -41,11 +41,11 @@ With a base‑N trie you can:
 
 ## ⚙️ Features
 
-- ✅ **Decimal trie** (`src/decimal_trie.c`)   
-- 🔄 **Recursive & iterative removal** with automatic cleanup  
-- 📚 **Well‑documented public API** in `include/*.h`  
-- 🧪 **Unit tests** in `tests/*.c`  
-- 🛠 **Configurable via** `.clang-format` & **checks enforced** by `.editorconfig`
+- ✅ **Base-10 (decimal) Trie** in `src/base_n_trie.c` / `.h`
+- ✅ **Demo program** in `examples/demo_decimal.c`
+- ✅ **Unit test** in `tests/basic.c`
+- 🌐 **CI via GitHub Actions** confirms build & tests on every merge
+- 🔀 **Generic architecture** supports arbitrary bases via function pointers
 
 ---
 
@@ -69,26 +69,20 @@ With a base‑N trie you can:
 ├── Makefile
 ├── README.md
 ├── STYLE.md
-├── build
-│   └── Debug
+├── demo
 ├── examples
-│   ├── build
-│   ├── demo_decimal.c
-│   └── demo_decimal.exe
-├── include
+│   └── demo_decimal.c
 ├── scripts
+│   ├── README.tmp
 │   └── update_tree.sh
 ├── src
 │   ├── base_n_trie.c
-│   ├── base_n_trie.h
-│   └── build
+│   └── base_n_trie.h
+├── test
 └── tests
-    ├── basic.c
-    ├── build
-    ├── test_config.c
-    └── test_decimal_trie.c
+    └── basic.c
 
-14 directories, 19 files
+8 directories, 19 files
 ```
 <!-- TREE END -->
 ---
@@ -104,8 +98,8 @@ With a base‑N trie you can:
 
 1. **Clone** the repository  
    ```bash
-   git clone https://github.com/your‑username/base-n-trie.git
-   cd base-n-trie
+    git clone https://github.com/FernandoAFOliveira/base-n-trie.git
+    cd base-n-trie
    ```
 
 2. **Build** with Make (or compile manually, works on Linux & WSL)  
@@ -117,11 +111,15 @@ With a base‑N trie you can:
    ```bash
    gcc -std=c11 -Wall -Wextra -O2 -Isrc src/base_n_trie.c examples/demo_decimal.c -o demo && ./demo
    ```
+3. **Build the Demo** 
+    gcc -std=c11 -Wall -Wextra -O2 -Isrc \
+    src/base_n_trie.c examples/demo_decimal.c -o demo && ./demo
 
-3. **Run tests**
+4. **Run tests**
      tests/basic.c  
    ```bash
-gcc -std=c11 -Wall -Wextra -O2 -Isrc src/base_n_trie.c tests/basic.c -o test && ./test
+    gcc -std=c11 -Wall -Wextra -O2 -Isrc \
+    src/base_n_trie.c tests/basic.c -o test && ./test
    ```
 
 ---
