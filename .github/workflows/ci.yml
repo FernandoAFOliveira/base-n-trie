@@ -34,3 +34,9 @@ jobs:
               src/base_n_trie.c tests/basic.c \
               -o test
           ./test        # exits 0 only if all asserts pass
+      - name: Build and run octal unit test
+        run: |
+          gcc -std=c11 -Wall -Wextra -O2 -Isrc \
+              src/base_n_trie.c tests/test_octal_trie.c \
+              -o test_octal
+          ./test_octal  # exits 0 only if all asserts pass
