@@ -51,24 +51,43 @@ With a base‑N trie you can:
 
 <!-- TREE START -->
 ```plaintext
-base-n-trie/
-├── src/  
-│   ├── base_n_trie.c   
-├── include/  
-│   ├── base_n_trie.h
-├── examples/
-│   ├── demo_decimal.c    
-├── tests/  
-│   ├── test_decimal_trie.c
-│   ├── basic.c
-│   ├── test_config.c
-│   ├── test_decimal_trie.c  
-├── .gitignore  
-├── .editorconfig  
-├── .clang-format  
-├── STYLE.md  
-└── README.md
-```  
+.
+├── -p
+├── .clang-format
+├── .editorconfig
+├── .github
+│   └── workflows
+├── .gitignore
+├── .vscode
+│   ├── c_cpp_properties.json
+│   ├── launch.json
+│   ├── settings.json
+│   └── tasks.json
+├── LICENSE
+├── Makefile
+├── README.md
+├── STYLE.md
+├── build
+│   └── Debug
+├── examples
+│   ├── build
+│   ├── demo_decimal.c
+│   └── demo_decimal.exe
+├── include
+├── scripts
+│   └── update_tree.sh
+├── src
+│   ├── base_n_trie.c
+│   ├── base_n_trie.h
+│   └── build
+└── tests
+    ├── basic.c
+    ├── build
+    ├── test_config.c
+    └── test_decimal_trie.c
+
+14 directories, 19 files
+```
 <!-- TREE END -->
 ---
 
