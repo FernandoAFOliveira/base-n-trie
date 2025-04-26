@@ -1,6 +1,8 @@
 # Base‑N Trie
 
+[![Latest tag](https://img.shields.io/github/v/tag/FernandoAFOliveira/base-n-trie?label=version)](https://github.com/FernandoAFOliveira/base-n-trie/tags)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 
 > A collection of trie (prefix‑tree) implementations for arbitrary bases:
 > - **Decimal trie** (base‑10)  
