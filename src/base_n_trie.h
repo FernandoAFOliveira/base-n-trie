@@ -48,6 +48,16 @@ char dec_to_char(uint8_t index);
 static inline BaseNTrie *trie_create_decimal(void) {
     return trie_create(10, dec_to_index, dec_to_char);
 }
+//
+uint8_t oct_to_index(char c) {
+    return (uint8_t)(c - '0');
+}
+char oct_to_char(uint8_t i) {
+    return (char)('0' + i);
+}
+static inline BaseNTrie *trie_create_octal(void) {
+    return trie_create(8, oct_to_index, oct_to_char);
+}
 
 /*
  * For print_trie(): maximum key length buffer
