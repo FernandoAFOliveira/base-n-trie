@@ -53,7 +53,7 @@ With a base‑N trie you can:
 
 <!-- TREE START -->
 ```plaintext
-.
+/mnt/c/Coding/base-n-trie
 ├── -p
 ├── .clang-format
 ├── .editorconfig
@@ -73,7 +73,6 @@ With a base‑N trie you can:
 ├── examples
 │   └── demo_decimal.c
 ├── scripts
-│   ├── README.tmp
 │   └── update_tree.sh
 ├── src
 │   ├── base_n_trie.c
@@ -82,7 +81,7 @@ With a base‑N trie you can:
 └── tests
     └── basic.c
 
-8 directories, 19 files
+8 directories, 18 files
 ```
 <!-- TREE END -->
 ---
