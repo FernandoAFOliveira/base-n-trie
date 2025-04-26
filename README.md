@@ -4,8 +4,7 @@
 
 > A collection of trie (prefix‑tree) implementations for arbitrary bases:
 > - **Decimal trie** (base‑10)  
-> - **Hex trie** (base‑16)  
-> - **Hybrid alphanumeric trie** (custom bases combining letters & digits)
+
 
 ---
 
@@ -40,9 +39,7 @@ With a base‑N trie you can:
 
 ## ⚙️ Features
 
-- ✅ **Decimal trie** (`src/decimal_trie.c`)  
-- ✅ **Hexadecimal trie** (`src/hex_trie.c`)  
-- ✅ **Hybrid alphanumeric trie** (letters & digits)  
+- ✅ **Decimal trie** (`src/decimal_trie.c`)   
 - 🔄 **Recursive & iterative removal** with automatic cleanup  
 - 📚 **Well‑documented public API** in `include/*.h`  
 - 🧪 **Unit tests** in `tests/*.c`  
@@ -52,34 +49,34 @@ With a base‑N trie you can:
 
 ## 🗂 Project Structure
 
+<!-- TREE START -->
 ```plaintext
 base-n-trie/
 ├── src/  
-│   ├── decimal_trie.c  
-│   ├── hex_trie.c  
-│   └── hybrid_trie.c  
+│   ├── base_n_trie.c   
 ├── include/  
-│   ├── decimal_trie.h  
-│   ├── hex_trie.h  
-│   └── hybrid_trie.h  
+│   ├── base_n_trie.h
+├── examples/
+│   ├── demo_decimal.c    
 ├── tests/  
+│   ├── test_decimal_trie.c
+│   ├── basic.c
+│   ├── test_config.c
 │   ├── test_decimal_trie.c  
-│   ├── test_hex_trie.c  
-│   └── test_hybrid_trie.c  
 ├── .gitignore  
 ├── .editorconfig  
 ├── .clang-format  
 ├── STYLE.md  
 └── README.md
 ```  
-
+<!-- TREE END -->
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- A C99‑compatible compiler (e.g. `gcc`, `clang`)  
+- A C11‑compatible compiler (e.g. `gcc`, `clang`)  
 - [Make](https://www.gnu.org/software/make/) (optional, for convenience)  
 
 ### Build & Run
@@ -90,21 +87,20 @@ base-n-trie/
    cd base-n-trie
    ```
 
-2. **Build** with Make (or compile manually)  
+2. **Build** with Make (or compile manually, works on Linux & WSL)  
    ```bash
    make
    ```
 
    _Or manually:_  
    ```bash
-   gcc -Iinclude -std=c99 -Wall src/decimal_trie.c tests/test_decimal_trie.c -o test_decimal_trie
+   gcc -std=c11 -Wall -Wextra -O2 -Isrc src/base_n_trie.c examples/demo_decimal.c -o demo && ./demo
    ```
 
-3. **Run tests**  
+3. **Run tests**
+     tests/basic.c  
    ```bash
-   ./test_decimal_trie
-   ./test_hex_trie
-   ./test_hybrid_trie
+gcc -std=c11 -Wall -Wextra -O2 -Isrc src/base_n_trie.c tests/basic.c -o test && ./test
    ```
 
 ---
@@ -114,19 +110,19 @@ base-n-trie/
 ### Decimal Trie
 
 ```c
-#include "decimal_trie.h"
+#include "base_n_trie.h"
 
 int main(void) {
-    DecTrie *t = create_dectrie();
-    insert(t, "0039");
-    insert(t, "1234567");
+    BaseNTrieTrie *t = trie_create();
+   trie_insert(t, "0039");
+   trie_insert(t, "1234567");
 
-    if (search(t, "0039")) {
+    if (trie_search(t, "0039")) {
         printf("Found 0039!\n");
     }
 
-    remove_string(t, "0039");
-    destroy_dectrie(t);
+    trie_delete(t, "0039");
+    trie_destroy(t);
     return 0;
 }
 ```
@@ -156,6 +152,9 @@ int main(void) {
 
 ## 🔮 Future Roadmap
 
+- ➕ **Turn decimal implementation into generic base-N core** (our next big chunk)
+- ➕ **Hex trie** (base‑16)  
+- ➕ **Hybrid alphanumeric trie** (custom bases combining letters & digits)
 - ➕ **Autocomplete** / prefix‑search APIs  
 - ➕ **Serialization** to/from disk  
 - ➕ **Benchmarking** & performance tuning  
