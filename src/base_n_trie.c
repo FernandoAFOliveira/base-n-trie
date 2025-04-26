@@ -2,10 +2,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
+#include <stdbool.h>
 
-static void *xmalloc(size_t n) {
-    void *p = malloc(n);
+//
+// -- Safe allocation --
+//
+static void *xmalloc(size_t bytes) {
+    void *p = malloc(bytes);
     if (!p) {
         fprintf(stderr, "base-n-trie: out of memory\n");
         exit(EXIT_FAILURE);
@@ -13,140 +16,207 @@ static void *xmalloc(size_t n) {
     return p;
 }
 
-/* static helper‑prototypes, e.g.: */
+//
+// -- Node definition (visible in .c only) --
+//
+typedef struct TrieNode_s {
+    struct TrieNode_s **children; // array of length trie->base
+    struct TrieNode_s *parent;    // NULL for root
+    void *value;                  // NULL = no data; non-NULL = stored data
+} TrieNode;
 
-static TrieNode *create_node(void);
-static void destroy_node(TrieNode *node);
-static int get_digit_index(char digit);
-static char index_to_char(int idx);
-static int trie_delete_recursive(TrieNode *node, const char *key, size_t len,
-                                 size_t pos);
-static int has_children(TrieNode *node);
+//
+// -- Trie handle definition --
+//
+struct BaseNTrie_s {
+    uint8_t base;
+    TrieNode *root;
+    to_index_fn to_index;
+    to_char_fn to_char;
+};
 
-/* Helpers to print everything in the trie */
-static void _print_all(TrieNode *node, char *buf, int depth);
+//
+// -- Forward helpers --
+//
+static TrieNode *create_node(BaseNTrie *trie, TrieNode *parent);
+static void destroy_subtrie(BaseNTrie *trie, TrieNode *node);
+static void cleanup_empty_branches(BaseNTrie *trie, TrieNode *start);
+static bool node_has_children(BaseNTrie *trie, TrieNode *node);
 
-/* public definitions (signatures come from the header) */
-BaseNTrie *trie_create(uint8_t base) {
-    (void)base; /* base unused for now, suppress warning */
-    /* existing body (was create_dectrie)… */
-    BaseNTrie *t = xmalloc(sizeof *t);
-    t->root = create_node();
-    return t;
-}
+//
+// -- Public API --
+//
 
-TrieNode *create_node(void) {
-    TrieNode *n = xmalloc(sizeof *n);
-    n->is_terminal = 0;
-    for (int i = 0; i < DIGIT_COUNT; i++)
-        n->children[i] = NULL;
-    return n;
+BaseNTrie *trie_create(uint8_t base, to_index_fn to_index, to_char_fn to_char) {
+    BaseNTrie *trie = xmalloc(sizeof *trie);
+    trie->base = base;
+    trie->to_index = to_index;
+    trie->to_char = to_char;
+    trie->root = create_node(trie, NULL);
+    return trie;
 }
 
 void trie_destroy(BaseNTrie *trie) {
-    destroy_node(trie->root);
+    if (trie->root) {
+        destroy_subtrie(trie, trie->root);
+    }
     free(trie);
 }
 
-void destroy_node(TrieNode *node) {
-    if (!node)
-        return;
-    for (int i = 0; i < DIGIT_COUNT; i++)
-        destroy_node(node->children[i]);
-    free(node);
-}
+int trie_insert(BaseNTrie *trie, const char *key, void *value) {
+    TrieNode *current_node = trie->root;
+    size_t key_length = strlen(key);
 
-int get_digit_index(char digit) {
-    if (digit < '0' || digit > '9') {
-        fprintf(stderr, "Invalid key character: %c\n", digit);
-        exit(EXIT_FAILURE);
-    }
-    return digit - '0';
-}
+    for (size_t i = 0; i < key_length; ++i) {
+        char symbol = key[i];
+        uint8_t symbol_index = trie->to_index(symbol);
 
-char index_to_char(int idx) {
-    return (char)('0' + idx);
-}
-
-int trie_insert(BaseNTrie *trie, const char *key) {
-    TrieNode *p = trie->root;
-    size_t len = strlen(key);
-    for (size_t i = 0; i < len; i++) {
-        int idx = get_digit_index(key[i]);
-        if (!p->children[idx])
-            p->children[idx] = create_node();
-        p = p->children[idx];
-    }
-    p->is_terminal = 1;
-    return 0; // success
-}
-
-int trie_search(BaseNTrie *trie, const char *key) {
-    TrieNode *p = trie->root;
-    size_t len = strlen(key);
-    for (size_t i = 0; i < len; i++) {
-        int idx = get_digit_index(key[i]);
-        if (!p->children[idx])
-            return 0;
-        p = p->children[idx];
-    }
-    return p->is_terminal;
-}
-int trie_delete(BaseNTrie *trie, const char *key) {
-    trie_delete_recursive(trie->root, key, strlen(key), 0);
-    return 0; // success
-}
-
-int trie_delete_recursive(TrieNode *node, const char *key, size_t len,
-                          size_t pos) {
-    if (!node)
-        return 0;
-    if (pos == len) {
-        if (!node->is_terminal)
-            return 0;
-        if (has_children(node)) {
-            node->is_terminal = 0;
-            return 0;
+        // allocate child array if absent
+        if (current_node->children[symbol_index] == NULL) {
+            current_node->children[symbol_index] =
+                create_node(trie, current_node);
         }
-        free(node);
-        return 1;
+        current_node = current_node->children[symbol_index];
     }
-    int idx = get_digit_index(key[pos]);
-    int child_deleted =
-        trie_delete_recursive(node->children[idx], key, len, pos + 1);
-    if (child_deleted) {
-        node->children[idx] = NULL;
-        if (pos > 0 && !node->is_terminal && !has_children(node)) {
-            free(node);
-            return 1;
-        }
-    }
+
+    // attach the payload
+    current_node->value = value;
     return 0;
 }
 
-int has_children(TrieNode *node) {
-    if (!node)
-        return 0;
-    for (int i = 0; i < DIGIT_COUNT; i++)
-        if (node->children[i])
-            return 1;
-    return 0;
+void *trie_search(const BaseNTrie *trie, const char *key) {
+    TrieNode *current_node = trie->root;
+    size_t key_length = strlen(key);
+
+    for (size_t i = 0; i < key_length; ++i) {
+        char symbol = key[i];
+        uint8_t symbol_index = trie->to_index(symbol);
+
+        TrieNode *next = current_node->children[symbol_index];
+        if (!next) {
+            return NULL;
+        }
+        current_node = next;
+    }
+    return current_node->value;
 }
 
-void _print_all(TrieNode *node, char *buf, int depth) {
-    if (node->is_terminal) {
-        buf[depth] = '\0';
-        puts(buf);
-    }
-    for (int d = 0; d < DIGIT_COUNT; d++) {
-        if (node->children[d]) {
-            buf[depth] = index_to_char(d);
-            _print_all(node->children[d], buf, depth + 1);
+void *trie_delete(BaseNTrie *trie, const char *key) {
+    // first find the terminal node
+    TrieNode *current_node = trie->root;
+    size_t key_length = strlen(key);
+
+    for (size_t i = 0; i < key_length; ++i) {
+        char symbol = key[i];
+        uint8_t symbol_index = trie->to_index(symbol);
+        current_node = current_node->children[symbol_index];
+        if (!current_node) {
+            return NULL;
         }
     }
+
+    // detach and return old value
+    void *old_value = current_node->value;
+    if (!old_value) {
+        return NULL;
+    }
+    current_node->value = NULL;
+
+    // prune any empty branches upward
+    cleanup_empty_branches(trie, current_node);
+    return old_value;
 }
 
 void print_trie(BaseNTrie *trie) {
-    char buf[MAX_KEY_LEN];
-    _print_all(trie->root, buf, 0);
+    char buffer[MAX_KEY_LENGTH];
+    buffer[0] = '\0';
+
+    // recursive print helper
+    extern void _print_all(const BaseNTrie *trie, TrieNode *node, char *buf,
+                           int depth);
+
+    _print_all(trie, trie->root, buffer, 0);
+}
+
+//
+// -- Decimal convenience --
+//
+uint8_t dec_to_index(char symbol) {
+    return (uint8_t)(symbol - '0');
+}
+char dec_to_char(uint8_t idx) {
+    return (char)('0' + idx);
+}
+
+//
+// -- Internal helpers --
+//
+
+static TrieNode *create_node(BaseNTrie *trie, TrieNode *parent) {
+    TrieNode *node = xmalloc(sizeof *node);
+    node->parent = parent;
+    node->value = NULL;
+    // children array:
+    node->children = xmalloc(sizeof *node->children * trie->base);
+    for (uint8_t i = 0; i < trie->base; ++i)
+        node->children[i] = NULL;
+    return node;
+}
+
+static void destroy_subtrie(BaseNTrie *trie, TrieNode *node) {
+    for (uint8_t i = 0; i < trie->base; ++i) {
+        if (node->children[i]) {
+            destroy_subtrie(trie, node->children[i]);
+        }
+    }
+    free(node->children);
+    free(node);
+}
+
+static bool node_has_children(BaseNTrie *trie, TrieNode *node) {
+    for (uint8_t i = 0; i < trie->base; ++i)
+        if (node->children[i])
+            return true;
+    return false;
+}
+
+static void cleanup_empty_branches(BaseNTrie *trie, TrieNode *start) {
+    TrieNode *current = start;
+    while (current->parent) {
+        TrieNode *parent = current->parent;
+
+        // if node still has payload or any child → stop
+        if (current->value != NULL || node_has_children(trie, current)) {
+            break;
+        }
+
+        // find and unlink current from parent
+        for (uint8_t i = 0; i < trie->base; ++i) {
+            if (parent->children[i] == current) {
+                parent->children[i] = NULL;
+                break;
+            }
+        }
+
+        // free current
+        free(current->children);
+        free(current);
+
+        // move up
+        current = parent;
+    }
+}
+
+// recursive printer
+void _print_all(const BaseNTrie *trie, TrieNode *node, char *buf, int depth) {
+    if (node->value) {
+        buf[depth] = '\0';
+        puts(buf);
+    }
+    for (uint8_t i = 0; i < trie->base; ++i) {
+        if (node->children[i]) {
+            buf[depth] = trie->to_char(i);
+            _print_all(trie, node->children[i], buf, depth + 1);
+        }
+    }
 }
