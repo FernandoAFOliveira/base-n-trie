@@ -1,0 +1,34 @@
+name: Update README tree
+
+on:
+  push:
+    paths:
+      - '**/*.c'
+      - '**/*.h'
+      - README.md
+      - scripts/update_tree.sh
+
+jobs:
+  tree:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { token: ${{ secrets.GITHUB_TOKEN }} }
+
+      - name: Install tree
+        run: sudo apt-get update && sudo apt-get install -y tree
+
+      - name: Run script
+        run: |
+          chmod +x scripts/update_tree.sh
+          ./scripts/update_tree.sh
+      - name: Commit back if changed
+        run: |
+          if git diff --exit-code README.md > /dev/null; then
+            echo "README up-to-date"
+          else
+            git config user.name  "bot"
+            git config user.email "bot@users.noreply.github.com"
+            git commit -am "docs: auto-update project tree"
+            git push
+          fi
