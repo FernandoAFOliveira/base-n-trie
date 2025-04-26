@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y tree   # tree is optional; keeps README script happy
+
+      - name: Build demo
+        run: |
+          gcc -std=c11 -Wall -Wextra -O2 -Isrc \
+              src/base_n_trie.c examples/demo_decimal.c \
+              -o demo
+
+      - name: Run demo (sanity output)
+        run: |
+          ./demo | tee /tmp/out
+          grep -q "search 407" /tmp/out   # crude check demo ran
+
+      - name: Build and run unit test
+        run: |
+          gcc -std=c11 -Wall -Wextra -O2 -Isrc \
+              src/base_n_trie.c tests/basic.c \
+              -o test
+          ./test        # exits 0 only if all asserts pass
