@@ -2,18 +2,32 @@
 #include "../src/base_n_trie.h"
 
 int main(void) {
-    BaseNTrie *t = trie_create(10); /* decimal for now */
+    /* Use the decimal convenience creator */
+    BaseNTrie *trie = trie_create_decimal();
 
-    assert(trie_insert(t, "42") == 0);
-    assert(trie_insert(t, "420") == 0);
+    /* Two distinct payloads */
+    const char *payloadA = "A";
+    const char *payloadB = "B";
 
-    assert(trie_search(t, "42") == 1);
-    assert(trie_search(t, "7") == 0);
+    /* Insert keys with payloads */
+    assert(trie_insert(trie, "42", (void *)payloadA) == 0);
+    assert(trie_insert(trie, "420", (void *)payloadB) == 0);
 
-    trie_delete(t, "42");
-    assert(trie_search(t, "42") == 0);
-    assert(trie_search(t, "420") == 1);
+    /* Search returns the exact payload pointer */
+    assert(trie_search(trie, "42") == (void *)payloadA);
+    assert(trie_search(trie, "420") == (void *)payloadB);
 
-    trie_destroy(t);
+    /* Non-existent key returns NULL */
+    assert(trie_search(trie, "7") == NULL);
+
+    /* Delete returns the old payload */
+    void *deleted = trie_delete(trie, "42");
+    assert(deleted == (void *)payloadA);
+
+    /* After deletion, "42" is gone but "420" remains */
+    assert(trie_search(trie, "42") == NULL);
+    assert(trie_search(trie, "420") == (void *)payloadB);
+
+    trie_destroy(trie);
     return 0; /* all asserts passed */
 }
