@@ -21,3 +21,13 @@ $(EX_DIR)/%.o: $(EX_DIR)/%.c
 
 clean:
 	$(RM) $(SRC_DIR)/*.o $(EX_DIR)/*.o demo
+# ------------------------------------------------------------
+TEST_OBJ := tests/basic.o
+
+tests/%.o: tests/%.c
+	$(CC) $(CFLAGS) -I$(SRC_DIR) -c $< -o $@
+
+test: $(LIB_OBJ) $(TEST_OBJ)
+	$(CC) $(CFLAGS) -o test $^
+	./test
+# ------------------------------------------------------------
