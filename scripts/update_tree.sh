@@ -3,7 +3,7 @@ set -e
 
 TMP=$(mktemp)
 # Generate depth-2 tree, ignore .git and build artifacts
-tree -I '.git|*.o|demo|test' -L 2 -N -a > "$TMP"
+tree -I '.git|build|examples/build|tests/build|*.o|*.exe' -L 2 -N -a > "$TMP"
 
 # Replace the block between markers in README.md
 awk -v new_tree="$(cat "$TMP")" '
