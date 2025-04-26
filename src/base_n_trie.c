@@ -27,7 +27,9 @@ static int has_children(TrieNode *node);
 static void _print_all(TrieNode *node, char *buf, int depth);
 
 /* public definitions (signatures come from the header) */
-BaseNTrie *trie_create(void) {
+BaseNTrie *trie_create(uint8_t base) {
+    (void)base; /* base unused for now, suppress warning */
+    /* existing body (was create_dectrie)… */
     BaseNTrie *t = xmalloc(sizeof *t);
     t->root = create_node();
     return t;
@@ -41,7 +43,7 @@ TrieNode *create_node(void) {
     return n;
 }
 
-void destroy_dectrie(BaseNTrie *trie) {
+void trie_destroy(BaseNTrie *trie) {
     destroy_node(trie->root);
     free(trie);
 }
@@ -66,7 +68,7 @@ char index_to_char(int idx) {
     return (char)('0' + idx);
 }
 
-void insert(BaseNTrie *trie, const char *key) {
+int trie_insert(BaseNTrie *trie, const char *key) {
     TrieNode *p = trie->root;
     size_t len = strlen(key);
     for (size_t i = 0; i < len; i++) {
@@ -76,6 +78,7 @@ void insert(BaseNTrie *trie, const char *key) {
         p = p->children[idx];
     }
     p->is_terminal = 1;
+    return 0; // success
 }
 
 int trie_search(BaseNTrie *trie, const char *key) {
@@ -89,9 +92,9 @@ int trie_search(BaseNTrie *trie, const char *key) {
     }
     return p->is_terminal;
 }
-
-void trie_delete(BaseNTrie *trie, const char *key) {
+int trie_delete(BaseNTrie *trie, const char *key) {
     trie_delete_recursive(trie->root, key, strlen(key), 0);
+    return 0; // success
 }
 
 int trie_delete_recursive(TrieNode *node, const char *key, size_t len,

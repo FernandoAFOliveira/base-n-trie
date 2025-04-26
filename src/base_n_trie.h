@@ -2,6 +2,7 @@
 #define BASE_N_TRIE_H
 
 #include <stddef.h>
+#include <stdint.h>
 
 #define DIGIT_COUNT 10
 #define MAX_KEY_LEN 20
@@ -16,13 +17,13 @@ typedef struct BaseNTrie_s {
 } BaseNTrie;
 
 /* Create/destroy */
-BaseNTrie *trie_create(void);
+BaseNTrie *trie_create(uint8_t base);
 void trie_destroy(BaseNTrie *trie);
 
 /* Core operations */
-void trie_insert(BaseNTrie *trie, const char *key);
+int trie_insert(BaseNTrie *trie, const char *key);
 int trie_search(BaseNTrie *trie, const char *key);
-void trie_delete(BaseNTrie *trie, const char *key);
+int trie_delete(BaseNTrie *trie, const char *key);
 
 void print_trie(BaseNTrie *trie);
 
