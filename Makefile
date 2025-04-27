@@ -1,33 +1,52 @@
 CC      ?= gcc
 CFLAGS  ?= -std=c11 -Wall -Wextra -O2
-SRC_DIR := src
-EX_DIR  := examples
 
-LIB_OBJ := $(SRC_DIR)/base_n_trie.o
-DEMO_OBJ:= $(EX_DIR)/demo_decimal.o
+SRC     := src/base_n_trie.c
 
-.PHONY: all demo clean
+# grab all demos under examples/
+DEMO_SRCS := $(wildcard examples/demo_*.c)
+DEMO_BINS := $(notdir $(basename $(DEMO_SRCS)))
 
-all: demo
+# grab all tests under tests/
+TEST_SRCS := $(wildcard tests/*.c)
+TEST_BINS := $(notdir $(basename $(TEST_SRCS)))
 
-demo: $(LIB_OBJ) $(DEMO_OBJ)
-	$(CC) $(CFLAGS) -o demo $^
+.PHONY: all demos tests check clean
 
-$(SRC_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+# default
+all: demos tests
 
-$(EX_DIR)/%.o: $(EX_DIR)/%.c
-	$(CC) $(CFLAGS) -I$(SRC_DIR) -c $< -o $@
+#–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+# Build demos
+demos: $(DEMO_BINS)
 
+# pattern rule: demo_decimal ← examples/demo_decimal.c + library
+$(DEMO_BINS): %: examples/%.c $(SRC)
+	$(CC) $(CFLAGS) -Isrc $(SRC) $< -o $@
+
+#–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+# Build tests
+tests: $(TEST_BINS)
+
+# pattern rule: basic ← tests/basic.c + library
+$(TEST_BINS): %: tests/%.c $(SRC)
+	$(CC) $(CFLAGS) -Isrc $(SRC) $< -o $@
+
+#–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+# Build & run everything
+check: all
+	@echo "» Running demos…"
+	@for b in $(DEMO_BINS); do \
+	  echo "---- $$b ----"; \
+	  ./$$b; \
+	done
+	@echo "» Running tests…"
+	@for b in $(TEST_BINS); do \
+	  echo "---- $$b ----"; \
+	  ./$$b; \
+	done
+	@echo "✅  All demos & tests passed"
+
+#–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 clean:
-	$(RM) $(SRC_DIR)/*.o $(EX_DIR)/*.o demo
-# ------------------------------------------------------------
-TEST_OBJ := tests/basic.o
-
-tests/%.o: tests/%.c
-	$(CC) $(CFLAGS) -I$(SRC_DIR) -c $< -o $@
-
-test: $(LIB_OBJ) $(TEST_OBJ)
-	$(CC) $(CFLAGS) -o test $^
-	./test
-# ------------------------------------------------------------
+	-$(RM) $(DEMO_BINS) $(TEST_BINS)

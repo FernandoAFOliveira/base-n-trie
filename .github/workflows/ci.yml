@@ -15,47 +15,52 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y tree   # tree is optional; keeps README script happy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tree
 
-      - name: Build demo
+      - name: Build demo (decimal)
         run: |
           gcc -std=c11 -Wall -Wextra -O2 -Isrc \
               src/base_n_trie.c examples/demo_decimal.c \
-              -o demo
+              -o demo_decimal
 
-      - name: Run demo (sanity output)
+      - name: Sanity check demo (decimal)
         run: |
-          ./demo | tee /tmp/out
-          grep -q "search 407" /tmp/out   # crude check demo ran
+          ./demo_decimal | tee /tmp/out
+          grep -q "search 407" /tmp/out
 
-      - name: Build and run unit test
-        run: |
-          gcc -std=c11 -Wall -Wextra -O2 -Isrc \
-              src/base_n_trie.c tests/basic.c \
-              -o test
-          ./test        # exits 0 only if all asserts pass
-   # Octal demo
-      - name: Build & run octal demo
+      - name: Build & run demo (octal)
         run: |
           gcc -std=c11 -Wall -Wextra -O2 -Isrc \
               src/base_n_trie.c examples/demo_octal.c \
-              -o demo_octal && ./demo_octal
-  # Hex demo
-      - name: Build & run hex demo
+              -o demo_octal
+          ./demo_octal
+
+      - name: Build & run demo (hex)
         run: |
           gcc -std=c11 -Wall -Wextra -O2 -Isrc \
               src/base_n_trie.c examples/demo_hex.c \
-              -o demo_hex && ./demo_hex
-   # Octal unit test
-      - name: Build & run octal tests
+              -o demo_hex
+          ./demo_hex
+
+      - name: Build & run unit test (decimal)
+        run: |
+          gcc -std=c11 -Wall -Wextra -O2 -Isrc \
+              src/base_n_trie.c tests/basic.c \
+              -o test_decimal
+          ./test_decimal
+
+      - name: Build & run unit test (octal)
         run: |
           gcc -std=c11 -Wall -Wextra -O2 -Isrc \
               src/base_n_trie.c tests/test_octal_trie.c \
-              -o test_octal && ./test_octal
-   # Hex unit test
-      - name: Build & run hex tests
-        run: |
-         gcc -std=c11 -Wall -Wextra -O2 -Isrc \
-              src/base_n_trie.c tests/test_hex_trie.c \
-              -o test_hex && ./test_hex
+              -o test_octal
+          ./test_octal
 
+      - name: Build & run unit test (hex)
+        run: |
+          gcc -std=c11 -Wall -Wextra -O2 -Isrc \
+              src/base_n_trie.c tests/test_hex_trie.c \
+              -o test_hex
+          ./test_hex
