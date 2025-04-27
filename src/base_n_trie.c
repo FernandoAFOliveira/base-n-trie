@@ -1,8 +1,50 @@
+/**
+ * @file base_n_trie.c
+ * @brief A generic N-ary trie implementation.
+ *
+ * This file defines the functions declared in base_n_trie.h:
+ *   - trie_create / trie_destroy
+ *   - trie_insert / trie_search / trie_delete
+ *   - print_trie
+ *
+ * Internally, each node holds a payload pointer and a per-trie
+ * destructor (if supplied), so that when you destroy the trie or
+ * delete a key, your payloads get freed correctly.
+ *
+ *  @author Fernando Oliveira
+ */
+
 #include "base_n_trie.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+
+// —––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+// Helpers for the “convenience” alphabets.  These must have external linkage.
+uint8_t dec_to_index(char symbol) {
+    return (uint8_t)(symbol - '0');
+}
+char dec_to_char(uint8_t index) {
+    return (char)('0' + index);
+}
+
+uint8_t oct_to_index(char symbol) {
+    return (uint8_t)(symbol - '0');
+}
+char oct_to_char(uint8_t index) {
+    return (char)('0' + index);
+}
+
+uint8_t hex_to_index(char c) {
+    if (c >= '0' && c <= '9')
+        return (uint8_t)(c - '0');
+    return (uint8_t)(10 + (uint8_t)(toupper((unsigned char)c) - 'A'));
+}
+char hex_to_char(uint8_t index) {
+    return index < 10 ? (char)('0' + index) : (char)('A' + (index - 10));
+}
+// —––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 
 //
 // -- Safe allocation --
@@ -43,11 +85,20 @@ static TrieNode *create_node(BaseNTrie *trie, TrieNode *parent);
 static void destroy_subtrie(BaseNTrie *trie, TrieNode *node);
 static void cleanup_empty_branches(BaseNTrie *trie, TrieNode *start);
 static bool node_has_children(BaseNTrie *trie, TrieNode *node);
+static void _print_all(const BaseNTrie *trie, TrieNode *node, char *buf,
+                       int depth);
 
 //
 // -- Public API --
 //
-
+/**
+ * @brief Allocate a new trie.
+ * @param base      The size of the alphabet (e.g. 10 for decimal).
+ * @param to_index  Function that maps a symbol → [0..base-1].
+ * @param to_char   Function that maps an index → symbol.
+ * @param dtor      Optional destructor to free your payloads (or NULL).
+ * @return          A fresh BaseNTrie*, or exits on allocation failure.
+ */
 BaseNTrie *trie_create(uint8_t base, to_index_fn to_index, to_char_fn to_char,
                        destructor_fn dtor) {
     BaseNTrie *trie = xmalloc(sizeof *trie);
@@ -58,7 +109,10 @@ BaseNTrie *trie_create(uint8_t base, to_index_fn to_index, to_char_fn to_char,
     trie->root = create_node(trie, NULL);
     return trie;
 }
-
+/**
+ * @brief Free all nodes in the trie (and payloads via the dtor) and the handle
+ * itself.
+ */
 void trie_destroy(BaseNTrie *trie) {
     if (trie->root) {
         destroy_subtrie(trie, trie->root);
@@ -130,15 +184,13 @@ void *trie_delete(BaseNTrie *trie, const char *key) {
     return old_value;
 }
 
+/**
+ * @brief Print all stored keys to stdout.
+ */
 void print_trie(BaseNTrie *trie) {
-    char buffer[MAX_KEY_LENGTH];
-    buffer[0] = '\0';
-
-    // recursive print helper
-    extern void _print_all(const BaseNTrie *trie, TrieNode *node, char *buf,
-                           int depth);
-
-    _print_all(trie, trie->root, buffer, 0);
+    char buf[MAX_KEY_LENGTH];
+    buf[0] = '\0';
+    _print_all(trie, trie->root, buf, 0);
 }
 
 //
@@ -150,12 +202,14 @@ static TrieNode *create_node(BaseNTrie *trie, TrieNode *parent) {
     node->parent = parent;
     node->value = NULL;
     // children array:
-    node->children = xmalloc(sizeof *node->children * trie->base);
-    for (uint8_t i = 0; i < trie->base; ++i)
+    node->children = xmalloc((size_t)trie->base * sizeof *node->children);
+    for (uint8_t i = 0; i < trie->base; ++i) {
         node->children[i] = NULL;
+    }
+    printf("creating node, base=%u, at %p\n", trie->base, node->children);
     return node;
 }
-
+/* Recursively free a subtree rooted at node. */
 static void destroy_subtrie(BaseNTrie *trie, TrieNode *node) {
     for (uint8_t i = 0; i < trie->base; ++i) {
         if (node->children[i]) {
@@ -206,16 +260,23 @@ static void cleanup_empty_branches(BaseNTrie *trie, TrieNode *start) {
     }
 }
 
-// recursive printer
-void _print_all(const BaseNTrie *trie, TrieNode *node, char *buf, int depth) {
+/* ----------------------------------------------------------------
+ *  _print_all
+ *
+ *  Recursively walk the subtree, building up buf[] and printing
+ *  whenever node->value != NULL.
+ */
+static void _print_all(const BaseNTrie *trie, TrieNode *node, char *buf,
+                       int depth) {
     if (node->value) {
         buf[depth] = '\0';
         puts(buf);
     }
     for (uint8_t i = 0; i < trie->base; ++i) {
-        if (node->children[i]) {
+        TrieNode *child = node->children[i];
+        if (child) {
             buf[depth] = trie->to_char(i);
-            _print_all(trie, node->children[i], buf, depth + 1);
+            _print_all(trie, child, buf, depth + 1);
         }
     }
 }
