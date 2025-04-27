@@ -25,6 +25,7 @@ tests: $(TEST_BINS)
 # pattern rule: basic ← tests/basic.c + library
 $(TEST_BINS): %: tests/%.c $(SRC)
 	$(CC) $(CFLAGS) -Isrc $(SRC) $< -o $@
+	chmod +x $@
 #–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 # Build & run everything
 check: all
