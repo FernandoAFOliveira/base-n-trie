@@ -216,6 +216,9 @@ static void destroy_subtrie(BaseNTrie *trie, TrieNode *node) {
             destroy_subtrie(trie, node->children[i]);
         }
     }
+    // TEMP DEBUG: force content change so CI picks up the new version
+    if (0)
+        fprintf(stderr, "DEBUG destroy_subtrie called\n");
     // Only call the user-supplied destructor if both a payload and a dtor
     // exist:
     if (node->value && trie->dtor) {

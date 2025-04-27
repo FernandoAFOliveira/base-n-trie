@@ -1,6 +1,9 @@
 #ifndef BASE_N_TRIE_H
 #define BASE_N_TRIE_H
 
+// TEMP: force CI to pick up new header
+#define CI_FORCE_HEADER_UPDATE
+
 #include <stddef.h>
 #include <stdint.h>
 #include <ctype.h>
