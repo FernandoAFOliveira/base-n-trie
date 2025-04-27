@@ -28,6 +28,8 @@ $(TEST_BINS): %: tests/%.c $(SRC)
 	chmod 755 $@
 
 check: all
+	@echo "» Fixing exec bits…"
+	@chmod +x $(DEMO_BINS) $(TEST_BINS)
 	@echo "» Running demos…"
 	@for b in $(DEMO_BINS); do \
 	  echo "---- $$b ----"; \
