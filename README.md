@@ -54,7 +54,6 @@ With a base‑N trie you can:
 <!-- TREE START -->
 ```plaintext
 /mnt/c/Coding/base-n-trie
-├── -p
 ├── .clang-format
 ├── .editorconfig
 ├── .github
@@ -69,19 +68,31 @@ With a base‑N trie you can:
 ├── Makefile
 ├── README.md
 ├── STYLE.md
+├── basic
 ├── demo
+├── demo_decimal
+├── demo_hex
+├── demo_octal
 ├── examples
-│   └── demo_decimal.c
+│   ├── demo_decimal.c
+│   ├── demo_hex.c
+│   └── demo_octal.c
 ├── scripts
 │   └── update_tree.sh
 ├── src
 │   ├── base_n_trie.c
 │   └── base_n_trie.h
 ├── test
+├── test_dec
+├── test_hex_trie
+├── test_oct
+├── test_octal_trie
 └── tests
-    └── basic.c
+    ├── basic.c
+    ├── test_hex_trie.c
+    └── test_octal_trie.c
 
-8 directories, 18 files
+7 directories, 30 files
 ```
 <!-- TREE END -->
 ---
@@ -157,6 +168,9 @@ int main(void) {
     destroy_hextrie(h);
 }
 ```
+## Creation with automatic payload cleanup
+```c
+BaseNTrie *t = trie_create_hex(); // uses free() to destroy payloads
 
 ---
 

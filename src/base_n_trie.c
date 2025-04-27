@@ -33,6 +33,7 @@ struct BaseNTrie_s {
     TrieNode *root;
     to_index_fn to_index;
     to_char_fn to_char;
+    destructor_fn dtor;
 };
 
 //
@@ -47,11 +48,13 @@ static bool node_has_children(BaseNTrie *trie, TrieNode *node);
 // -- Public API --
 //
 
-BaseNTrie *trie_create(uint8_t base, to_index_fn to_index, to_char_fn to_char) {
+BaseNTrie *trie_create(uint8_t base, to_index_fn to_index, to_char_fn to_char,
+                       destructor_fn dtor) {
     BaseNTrie *trie = xmalloc(sizeof *trie);
     trie->base = base;
     trie->to_index = to_index;
     trie->to_char = to_char;
+    trie->dtor = dtor;
     trie->root = create_node(trie, NULL);
     return trie;
 }
@@ -159,6 +162,12 @@ static void destroy_subtrie(BaseNTrie *trie, TrieNode *node) {
             destroy_subtrie(trie, node->children[i]);
         }
     }
+    // Free the stored value (if any) via the user’s destructor
+    if (node->value && trie->dtor) {
+        // Call the destructor function to free the value
+        trie->dtor(node->value);
+    }
+    // Free the children array and the node itself
     free(node->children);
     free(node);
 }

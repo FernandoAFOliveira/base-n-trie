@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <ctype.h>
+#include <stdlib.h>
 
 /*
  * Function pointer types for custom alphabets:
@@ -12,12 +13,14 @@
  */
 typedef uint8_t (*to_index_fn)(char symbol);
 typedef char (*to_char_fn)(uint8_t index);
+typedef void (*destructor_fn)(void *value);
 
 /* Opaque trie handle; fields are hidden from users */
 typedef struct BaseNTrie_s BaseNTrie;
 
 /* Public API */
-BaseNTrie *trie_create(uint8_t base, to_index_fn to_index, to_char_fn to_char);
+BaseNTrie *trie_create(uint8_t base, to_index_fn to_index, to_char_fn to_char,
+                       destructor_fn dtor);
 void trie_destroy(BaseNTrie *trie);
 int trie_insert(BaseNTrie *trie, const char *key, void *value);
 void *trie_search(const BaseNTrie *trie, const char *key);
@@ -32,7 +35,7 @@ static inline char dec_to_char(uint8_t index) {
     return (char)('0' + index);
 }
 static inline BaseNTrie *trie_create_decimal(void) {
-    return trie_create(10, dec_to_index, dec_to_char);
+    return trie_create(10, dec_to_index, dec_to_char, NULL);
 }
 
 /* Convenience: Octal (base-8) */
@@ -43,7 +46,7 @@ static inline char oct_to_char(uint8_t index) {
     return (char)('0' + index);
 }
 static inline BaseNTrie *trie_create_octal(void) {
-    return trie_create(8, oct_to_index, oct_to_char);
+    return trie_create(8, oct_to_index, oct_to_char, NULL);
 }
 
 /* Convenience: Hexadecimal (base-16) */
@@ -56,7 +59,7 @@ static inline char hex_to_char(uint8_t index) {
     return index < 10 ? (char)('0' + index) : (char)('A' + (index - 10));
 }
 static inline BaseNTrie *trie_create_hex(void) {
-    return trie_create(16, hex_to_index, hex_to_char);
+    return trie_create(16, hex_to_index, hex_to_char, NULL);
 }
 
 /* Maximum key length buffer for print_trie */
