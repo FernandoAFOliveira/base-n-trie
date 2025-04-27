@@ -18,13 +18,13 @@ all: demos tests
 demos: $(DEMO_BINS)
 $(DEMO_BINS): %: examples/%.c $(SRC)
 	$(CC) $(CFLAGS) -Isrc $(SRC) $< -o $@
-	chmod +x $@
+	chmod 755 $@
 
 # Build tests using wildcard
 tests: $(TEST_BINS)
 $(TEST_BINS): %: tests/%.c $(SRC)
 	$(CC) $(CFLAGS) -Isrc $(SRC) $< -o $@
-	chmod +x $@
+	chmod 755 $@
 
 check: all
 	@echo "» Running demos…"
