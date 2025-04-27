@@ -139,16 +139,6 @@ void print_trie(BaseNTrie *trie) {
 }
 
 //
-// -- Decimal convenience --
-//
-uint8_t dec_to_index(char symbol) {
-    return (uint8_t)(symbol - '0');
-}
-char dec_to_char(uint8_t idx) {
-    return (char)('0' + idx);
-}
-
-//
 // -- Internal helpers --
 //
 

@@ -3,56 +3,39 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <ctype.h>
 
 /*
  * Function pointer types for custom alphabets:
- * - symbol → index in [0..base-1]
- * - index → symbol character
+ *   symbol → index in [0..base-1]
+ *   index  → symbol character
  */
 typedef uint8_t (*to_index_fn)(char symbol);
 typedef char (*to_char_fn)(uint8_t index);
 
-/*
- * Forward-declare the opaque trie handle.
- * Client code never sees its fields.
- */
+/* Opaque trie handle; fields are hidden from users */
 typedef struct BaseNTrie_s BaseNTrie;
 
-/*
- * Public API:
- *   trie_create:  allocate a new trie with given base & mapping functions
- *   trie_destroy: free all memory
- *
- *   trie_insert:  associate 'value' with 'key'; returns 0 on success
- *   trie_search:  return the stored value for 'key' or NULL
- *   trie_delete:  remove 'key' and return its old value or NULL
- *
- *   print_trie:   debug-print all stored keys (calls to_char for symbols)
- */
+/* Public API */
 BaseNTrie *trie_create(uint8_t base, to_index_fn to_index, to_char_fn to_char);
-
 void trie_destroy(BaseNTrie *trie);
-
 int trie_insert(BaseNTrie *trie, const char *key, void *value);
-
 void *trie_search(const BaseNTrie *trie, const char *key);
-
 void *trie_delete(BaseNTrie *trie, const char *key);
+void print_trie(BaseNTrie *trie);
 
-/*
- * Optional convenience for a decimal-only trie:
- */
+/* Convenience: Decimal (base-10) */
 static inline uint8_t dec_to_index(char symbol) {
     return (uint8_t)(symbol - '0');
 }
-
 static inline char dec_to_char(uint8_t index) {
     return (char)('0' + index);
 }
 static inline BaseNTrie *trie_create_decimal(void) {
     return trie_create(10, dec_to_index, dec_to_char);
 }
-//
+
+/* Convenience: Octal (base-8) */
 static inline uint8_t oct_to_index(char symbol) {
     return (uint8_t)(symbol - '0');
 }
@@ -63,9 +46,20 @@ static inline BaseNTrie *trie_create_octal(void) {
     return trie_create(8, oct_to_index, oct_to_char);
 }
 
-/*
- * For print_trie(): maximum key length buffer
- */
+/* Convenience: Hexadecimal (base-16) */
+static inline uint8_t hex_to_index(char c) {
+    if (c >= '0' && c <= '9')
+        return (uint8_t)(c - '0');
+    return (uint8_t)(10 + (uint8_t)(toupper((unsigned char)c) - 'A'));
+}
+static inline char hex_to_char(uint8_t index) {
+    return index < 10 ? (char)('0' + index) : (char)('A' + (index - 10));
+}
+static inline BaseNTrie *trie_create_hex(void) {
+    return trie_create(16, hex_to_index, hex_to_char);
+}
+
+/* Maximum key length buffer for print_trie */
 #define MAX_KEY_LENGTH 256
 
 #endif /* BASE_N_TRIE_H */

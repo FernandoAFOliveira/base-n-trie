@@ -34,9 +34,28 @@ jobs:
               src/base_n_trie.c tests/basic.c \
               -o test
           ./test        # exits 0 only if all asserts pass
-      - name: Build and run octal unit test
+   # Octal demo
+      - name: Build & run octal demo
+        run: |
+          gcc -std=c11 -Wall -Wextra -O2 -Isrc \
+              src/base_n_trie.c examples/demo_octal.c \
+              -o demo_octal && ./demo_octal
+  # Hex demo
+      - name: Build & run hex demo
+        run: |
+          gcc -std=c11 -Wall -Wextra -O2 -Isrc \
+              src/base_n_trie.c examples/demo_hex.c \
+              -o demo_hex && ./demo_hex
+   # Octal unit test
+      - name: Build & run octal tests
         run: |
           gcc -std=c11 -Wall -Wextra -O2 -Isrc \
               src/base_n_trie.c tests/test_octal_trie.c \
-              -o test_octal
-          ./test_octal  # exits 0 only if all asserts pass
+              -o test_octal && ./test_octal
+   # Hex unit test
+      - name: Build & run hex tests
+        run: |
+         gcc -std=c11 -Wall -Wextra -O2 -Isrc \
+              src/base_n_trie.c tests/test_hex_trie.c \
+              -o test_hex && ./test_hex
+
