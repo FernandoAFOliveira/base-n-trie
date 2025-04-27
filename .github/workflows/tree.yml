@@ -1,5 +1,8 @@
 name: Update README tree
 
+permissions:
+  contents: write    # ← gives GITHUB_TOKEN permission to push commits
+
 on:
   push:
     paths:
