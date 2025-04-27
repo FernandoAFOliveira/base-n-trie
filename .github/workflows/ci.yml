@@ -1,66 +1,17 @@
-name: CI
+# .github/workflows/ci.yml
+name: C CI
 
 on:
   push:
-    branches: [ main ]
   pull_request:
-    branches: [ main ]
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v2
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y tree
-
-      - name: Build demo (decimal)
-        run: |
-          gcc -std=c11 -Wall -Wextra -O2 -Isrc \
-              src/base_n_trie.c examples/demo_decimal.c \
-              -o demo_decimal
-
-      - name: Sanity check demo (decimal)
-        run: |
-          ./demo_decimal | tee /tmp/out
-          grep -q "search 407" /tmp/out
-
-      - name: Build & run demo (octal)
-        run: |
-          gcc -std=c11 -Wall -Wextra -O2 -Isrc \
-              src/base_n_trie.c examples/demo_octal.c \
-              -o demo_octal
-          ./demo_octal
-
-      - name: Build & run demo (hex)
-        run: |
-          gcc -std=c11 -Wall -Wextra -O2 -Isrc \
-              src/base_n_trie.c examples/demo_hex.c \
-              -o demo_hex
-          ./demo_hex
-
-      - name: Build & run unit test (decimal)
-        run: |
-          gcc -std=c11 -Wall -Wextra -O2 -Isrc \
-              src/base_n_trie.c tests/basic.c \
-              -o test_decimal
-          ./test_decimal
-
-      - name: Build & run unit test (octal)
-        run: |
-          gcc -std=c11 -Wall -Wextra -O2 -Isrc \
-              src/base_n_trie.c tests/test_octal_trie.c \
-              -o test_octal
-          ./test_octal
-
-      - name: Build & run unit test (hex)
-        run: |
-          gcc -std=c11 -Wall -Wextra -O2 -Isrc \
-              src/base_n_trie.c tests/test_hex_trie.c \
-              -o test_hex
-          ./test_hex
+      # install gcc, make, etc if you need it (on ubuntu-latest it's already there)
+      - name: Build & run all demos+tests
+        working-directory: .
+        run: make check
