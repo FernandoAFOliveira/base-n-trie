@@ -17,8 +17,8 @@ int main(void) {
     void *found1 = trie_search(trie, "407");
     void *found2 = trie_search(trie, "999");
 
-    printf("search \"407\" → %s, found? %d\n", (char *)found1, found1 != NULL);
-    printf("search \"999\" → %s, found? %d\n", found2 ? (char *)found2 : "NULL",
+    printf("search \"407\" → %s found? %d\n", (char *)found1, found1 != NULL);
+    printf("search \"999\" → %s found? %d\n", found2 ? (char *)found2 : "NULL",
            found2 != NULL);
 
     /* Delete one key and print its old payload */
