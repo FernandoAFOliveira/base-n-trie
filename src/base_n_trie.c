@@ -171,14 +171,12 @@ void *trie_delete(BaseNTrie *trie, const char *key) {
             return NULL;
         }
     }
-
     // detach and return old value
     void *old_value = current_node->value;
     if (!old_value) {
         return NULL;
     }
     current_node->value = NULL;
-
     // prune any empty branches upward
     cleanup_empty_branches(trie, current_node);
     return old_value;
