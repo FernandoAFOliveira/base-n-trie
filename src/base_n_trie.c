@@ -216,12 +216,11 @@ static void destroy_subtrie(BaseNTrie *trie, TrieNode *node) {
             destroy_subtrie(trie, node->children[i]);
         }
     }
-    // Free the stored value (if any) via the user’s destructor
+    // Only call the user-supplied destructor if both a payload and a dtor
+    // exist:
     if (node->value && trie->dtor) {
-        // Call the destructor function to free the value
         trie->dtor(node->value);
     }
-    // Free the children array and the node itself
     free(node->children);
     free(node);
 }

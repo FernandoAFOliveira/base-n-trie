@@ -102,8 +102,10 @@ static inline BaseNTrie *trie_create_hex(void) {
     extern char hex_to_char(uint8_t);
     return trie_create(16, hex_to_index, hex_to_char, NULL);
 }
-/*---------------------------------------------------------------------------*/
-/* Maximum buffer length for print_trie() */
+/**--------------------------------------------------------------------------
+ * Maximum buffer length for print_trie()
+ *
+ *----------------------------------------------------------------------- */
 #define MAX_KEY_LENGTH 256
 
 #endif /* BASE_N_TRIE_H */
