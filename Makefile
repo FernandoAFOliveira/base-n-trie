@@ -3,11 +3,11 @@ CC      ?= gcc
 CFLAGS  ?= -std=c11 -Wall -Wextra -O2
 SRC     := src/base_n_trie.c
 
-# Use shell-based wildcard expansion (works more reliably in CI)
-DEMO_SRCS := $(shell find examples -name 'demo_*.c')
+# Use explicit wildcards for CI compatibility
+DEMO_SRCS := $(shell find examples -maxdepth 1 -name 'demo_*.c')
 DEMO_BINS := $(notdir $(basename $(DEMO_SRCS)))
 
-TEST_SRCS := $(shell find tests -name 'test_*.c' -o -name 'basic.c')
+TEST_SRCS := $(shell find tests -maxdepth 1 -name 'test_*.c' -o -name 'basic.c')
 TEST_BINS := $(notdir $(basename $(TEST_SRCS)))
 
 .PHONY: all demos tests check clean
