@@ -4,7 +4,7 @@ CFLAGS  ?= -std=c11 -Wall -Wextra -O2
 SRC     := src/base_n_trie.c
 
 # Use explicit wildcards for CI compatibility
-DEMO_SRCS := $(swildcard examples/*.c)
+DEMO_SRCS := $(wildcard examples/*.c)
 DEMO_BINS := $(notdir $(basename $(DEMO_SRCS)))
 
 
